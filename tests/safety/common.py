@@ -1,6 +1,8 @@
+import os
 import abc
 import struct
 import unittest
+import importlib
 import numpy as np
 from opendbc.can.packer import CANPacker # pylint: disable=import-error
 from panda.tests.safety import libpandasafety_py
@@ -261,7 +263,7 @@ class PandaSafetyTest(PandaSafetyTestBase):
 
   def test_sample_speed(self):
     self.assertFalse(self.safety.get_vehicle_moving())
-    
+
     # not moving
     self.safety.safety_rx_hook(self._speed_msg(0))
     self.assertFalse(self.safety.get_vehicle_moving())
@@ -273,3 +275,28 @@ class PandaSafetyTest(PandaSafetyTestBase):
     # past threshold
     self.safety.safety_rx_hook(self._speed_msg(self.STANDSTILL_THRESHOLD+1))
     self.assertTrue(self.safety.get_vehicle_moving())
+
+  def test_tx_hook_on_wrong_safety_mode(self):
+    files = os.listdir(os.path.dirname(os.path.realpath(__file__)))
+    test_files = [f for f in files if f.startswith("test_") and f.endswith(".py")]
+
+    current_test = self.__class__.__name__
+
+    all_tx = []
+    for tf in test_files:
+      test = importlib.import_module("panda.tests.safety."+tf[:-3])
+      for attr in dir(test):
+        if attr.startswith("Test") and attr != current_test:
+          tx = getattr(getattr(test, attr), "TX_MSGS")
+          if tx is not None:
+            all_tx.append(tx)
+
+    # make sure we got all the msgs
+    self.assertTrue(len(all_tx) >= len(test_files)-1)
+
+    for tx_msgs in all_tx:
+      for addr, bus in tx_msgs:
+        msg = make_msg(addr, bus)
+        self.safety.set_controls_allowed(1)
+        self.assertFalse(self._tx(msg))
+

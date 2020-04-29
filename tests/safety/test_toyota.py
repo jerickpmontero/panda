@@ -34,7 +34,6 @@ class TestToyotaSafety(common.PandaSafetyTest, common.InterceptorSafetyTest):
   FWD_BUS_LOOKUP = {0: 2, 2: 0}
   INTERCEPTOR_THRESHOLD = 845
 
-  @classmethod
   def setUp(self):
     self.packer = CANPackerPanda("toyota_prius_2017_pt_generated")
     self.safety = libpandasafety_py.libpandasafety
