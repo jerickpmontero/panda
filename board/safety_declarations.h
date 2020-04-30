@@ -99,6 +99,20 @@ struct sample_t torque_meas;       // last 3 motor torques produced by the eps
 struct sample_t torque_driver;     // last 3 driver torques measured
 uint32_t ts_last = 0;
 
+int rx_violations;
+#define RX_VIOLATION_NONE 0
+#define RX_VIOLATION_INVALID_MSG 1
+
+int tx_violations;
+#define TX_VIOLATION_NONE                          0
+#define TX_VIOLATION_MSG_NOT_ALLOWED               1
+#define TX_VIOLATION_RELAY_MALFUNCTION             2
+#define TX_VIOLATION_TORQUE_LIMIT_EXCEEDED         4
+#define TX_VIOLATION_TORQUE_RATE_LIMIT_EXCEEDED    8
+#define TX_VIOLATION_TORQUE_RT_RATE_LIMIT_EXCEEDED 16
+#define TX_VIOLATION_DISALLOWED_BTN                32
+#define TX_VIOLATION_INTERCEPTOR_COMMAND_TOO_HIGH  64
+
 // This can be set with a USB command
 // It enables features we consider to be unsafe, but understand others may have different opinions
 // It is always 0 on mainline comma.ai openpilot
